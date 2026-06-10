@@ -1,0 +1,88 @@
+@startuml Componentes-ECommerce
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam ArrowColor #34495E
+skinparam component {
+  BackgroundColor #EAF2F8
+  BorderColor #2E86C1
+  FontColor #1B4F72
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #85929E
+  FontColor #1B4F72
+  FontStyle bold
+}
+skinparam database {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+  FontColor #7D6608
+}
+skinparam storage {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+  FontColor #7D6608
+}
+skinparam node {
+  BackgroundColor #F4F6F7
+  BorderColor #5D6D7E
+  FontColor #1B4F72
+}
+skinparam interface {
+  BackgroundColor #D6EAF8
+  BorderColor #2E86C1
+}
+title <b>Diagrama de Componentes — ShopFlow</b>
+
+interface "HTTPS / REST" as REST
+interface "JDBC" as JDBC
+interface "API REST\nexterna" as EXT
+
+package "Frontend" {
+  [Web App] as WEB
+  [Mobile App] as MOB
+}
+
+[API Gateway] as GW
+
+package "Backend" {
+  [Autenticação] as AUTH
+  [Catálogo] as CAT
+  [Carrinho] as CART
+  [Pedidos] as ORD
+  [Pagamento] as PAY
+  [Notificação] as NOT
+}
+
+database "PostgreSQL" as DB
+database "Redis" as REDIS
+storage "Object Storage" as S3
+
+[Gateway Pagamento\n(externo)] as STRIPE
+[API Entrega\n(externo)] as SHIP
+[SMTP\n(externo)] as MAIL
+
+WEB -- REST
+MOB -- REST
+REST -- GW
+GW --> AUTH
+GW --> CAT
+GW --> CART
+GW --> ORD
+AUTH -- JDBC
+CAT -- JDBC
+ORD -- JDBC
+JDBC -- DB
+CAT --> REDIS
+CART --> REDIS
+CAT --> S3
+ORD --> PAY
+ORD --> NOT
+PAY -- EXT
+EXT -- STRIPE
+ORD --> SHIP
+NOT --> MAIL
+@enduml

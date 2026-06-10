@@ -1,0 +1,60 @@
+@startuml SD-UC01-Login
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam sequence {
+  ArrowColor #2E86C1
+  ArrowThickness 1.5
+  LifeLineBorderColor #85929E
+  LifeLineBackgroundColor #EAF2F8
+  ParticipantBackgroundColor #EAF2F8
+  ParticipantBorderColor #2E86C1
+  ParticipantFontColor #1B4F72
+  ActorBackgroundColor #D6EAF8
+  ActorBorderColor #2E86C1
+  GroupBackgroundColor #FDFEFE
+  GroupBorderColor #85929E
+  GroupHeaderFontColor #1B4F72
+}
+skinparam database {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+}
+skinparam note {
+  BackgroundColor #FCF3CF
+  BorderColor #D4AC0D
+}
+title <b>Diagrama de Sequência do Sistema — UC-01 Autenticar Usuário</b>
+
+actor "Cliente" as C
+participant "Interface Web" as UI
+participant ":Sistema\nAutenticação" as SA
+participant ":Repositório\nUsuário" as RU
+database "Banco de\nDados" as DB
+
+C -> UI : informarCredenciais(email, senha)
+activate UI
+UI -> SA : autenticar(email, senha)
+activate SA
+SA -> RU : buscarPorEmail(email)
+activate RU
+RU -> DB : SELECT usuário por e-mail
+activate DB
+DB --> RU : dadosUsuario
+deactivate DB
+RU --> SA : Usuario
+deactivate RU
+SA -> SA : validarSenha(senha, hash)
+
+alt #E8F8F5 Credenciais válidas
+  SA --> UI : token JWT
+  UI --> C : exibirPáginaInicial()
+else #FDEDEC Credenciais inválidas
+  SA --> UI : ErroAutenticacao
+  UI --> C : exibirMensagem("Credenciais inválidas")
+end
+deactivate SA
+deactivate UI
+@enduml

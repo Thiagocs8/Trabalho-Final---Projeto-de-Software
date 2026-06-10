@@ -1,0 +1,134 @@
+@startuml ER-ECommerce
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 11
+skinparam roundCorner 6
+skinparam ArrowColor #34495E
+skinparam linetype ortho
+hide circle
+hide methods
+skinparam class {
+  BackgroundColor #EAF2F8
+  BorderColor #2E86C1
+  FontColor #1B4F72
+  AttributeFontSize 10
+}
+title <b>Modelo de Dados (DER) — ShopFlow / PostgreSQL</b>
+
+entity "usuarios" as usuarios {
+  * <b>id</b> : UUID <<PK>>
+  --
+  nome : VARCHAR(150)
+  email : VARCHAR(200) <<UN>>
+  senha_hash : VARCHAR(255)
+  telefone : VARCHAR(20)
+  data_cadastro : TIMESTAMP
+}
+
+entity "enderecos" as enderecos {
+  * <b>id</b> : UUID <<PK>>
+  --
+  usuario_id : UUID <<FK>>
+  rua : VARCHAR(200)
+  numero : VARCHAR(10)
+  cidade : VARCHAR(100)
+  estado : CHAR(2)
+  cep : VARCHAR(9)
+}
+
+entity "categorias" as categorias {
+  * <b>id</b> : UUID <<PK>>
+  --
+  nome : VARCHAR(100)
+  descricao : TEXT
+}
+
+entity "produtos" as produtos {
+  * <b>id</b> : UUID <<PK>>
+  --
+  categoria_id : UUID <<FK>>
+  nome : VARCHAR(200)
+  descricao : TEXT
+  preco : DECIMAL(10,2)
+  imagem_url : VARCHAR(500)
+  ativo : BOOLEAN
+}
+
+entity "estoque" as estoque {
+  * <b>id</b> : UUID <<PK>>
+  --
+  produto_id : UUID <<FK,UN>>
+  quantidade : INTEGER
+  estoque_minimo : INTEGER
+}
+
+entity "carrinhos" as carrinhos {
+  * <b>id</b> : UUID <<PK>>
+  --
+  usuario_id : UUID <<FK>>
+  data_criacao : TIMESTAMP
+}
+
+entity "itens_carrinho" as itens_carrinho {
+  * <b>id</b> : UUID <<PK>>
+  --
+  carrinho_id : UUID <<FK>>
+  produto_id : UUID <<FK>>
+  quantidade : INTEGER
+  preco_unitario : DECIMAL(10,2)
+}
+
+entity "pedidos" as pedidos {
+  * <b>id</b> : UUID <<PK>>
+  --
+  usuario_id : UUID <<FK>>
+  endereco_id : UUID <<FK>>
+  numero_pedido : VARCHAR(20) <<UN>>
+  status : VARCHAR(30)
+  valor_total : DECIMAL(10,2)
+  data_pedido : TIMESTAMP
+}
+
+entity "itens_pedido" as itens_pedido {
+  * <b>id</b> : UUID <<PK>>
+  --
+  pedido_id : UUID <<FK>>
+  produto_id : UUID <<FK>>
+  quantidade : INTEGER
+  preco_unitario : DECIMAL(10,2)
+}
+
+entity "pagamentos" as pagamentos {
+  * <b>id</b> : UUID <<PK>>
+  --
+  pedido_id : UUID <<FK,UN>>
+  valor : DECIMAL(10,2)
+  metodo : VARCHAR(30)
+  status : VARCHAR(20)
+  transacao_id : VARCHAR(100)
+}
+
+entity "avaliacoes" as avaliacoes {
+  * <b>id</b> : UUID <<PK>>
+  --
+  usuario_id : UUID <<FK>>
+  produto_id : UUID <<FK>>
+  nota : SMALLINT
+  comentario : TEXT
+}
+
+usuarios ||--o{ enderecos
+usuarios ||--o| carrinhos
+usuarios ||--o{ pedidos
+usuarios ||--o{ avaliacoes
+categorias ||--o{ produtos
+produtos ||--|| estoque
+produtos ||--o{ itens_carrinho
+produtos ||--o{ itens_pedido
+produtos ||--o{ avaliacoes
+carrinhos ||--o{ itens_carrinho
+pedidos ||--o{ itens_pedido
+pedidos ||--|| pagamentos
+enderecos ||--o{ pedidos
+@enduml

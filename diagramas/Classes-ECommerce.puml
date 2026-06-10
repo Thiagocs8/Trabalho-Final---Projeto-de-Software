@@ -1,0 +1,158 @@
+@startuml Classes-ECommerce
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 11
+skinparam roundCorner 6
+skinparam ArrowColor #34495E
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #EAF2F8
+  BorderColor #2E86C1
+  FontColor #1B4F72
+  HeaderBackgroundColor #D6EAF8
+  AttributeFontColor #2C3E50
+  AttributeFontSize 10
+}
+skinparam enum {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+}
+title <b>Diagrama de Classes — ShopFlow</b>
+
+class Usuario {
+  - id: UUID
+  - nome: String
+  - email: String
+  - senhaHash: String
+  - telefone: String
+  - dataCadastro: Date
+  + autenticar(senha): Boolean
+  + atualizarPerfil(): void
+}
+
+class Endereco {
+  - id: UUID
+  - rua: String
+  - numero: String
+  - cidade: String
+  - estado: String
+  - cep: String
+  + validar(): Boolean
+}
+
+class Produto {
+  - id: UUID
+  - nome: String
+  - descricao: String
+  - preco: Decimal
+  - imagemUrl: String
+  - ativo: Boolean
+  + estaDisponivel(): Boolean
+}
+
+class Categoria {
+  - id: UUID
+  - nome: String
+  - descricao: String
+}
+
+class Estoque {
+  - id: UUID
+  - quantidade: Integer
+  - estoqueMinimo: Integer
+  + verificarDisponibilidade(qtd): Boolean
+  + reservar(qtd): void
+  + liberar(qtd): void
+}
+
+class Carrinho {
+  - id: UUID
+  - dataCriacao: Date
+  + adicionarItem(produto, qtd): void
+  + removerItem(itemId): void
+  + calcularTotal(): Decimal
+}
+
+class ItemCarrinho {
+  - id: UUID
+  - quantidade: Integer
+  - precoUnitario: Decimal
+  + calcularSubtotal(): Decimal
+}
+
+class Pedido {
+  - id: UUID
+  - numeroPedido: String
+  - dataPedido: Date
+  - status: StatusPedido
+  - valorTotal: Decimal
+  + confirmar(): void
+  + cancelar(): void
+  + calcularFrete(): Decimal
+}
+
+class ItemPedido {
+  - id: UUID
+  - quantidade: Integer
+  - precoUnitario: Decimal
+  + calcularSubtotal(): Decimal
+}
+
+class Pagamento {
+  - id: UUID
+  - valor: Decimal
+  - metodo: MetodoPagamento
+  - status: StatusPagamento
+  - transacaoId: String
+  + processar(): void
+  + estornar(): void
+}
+
+class Avaliacao {
+  - id: UUID
+  - nota: Integer
+  - comentario: String
+  - dataAvaliacao: Date
+}
+
+enum StatusPedido {
+  AGUARDANDO_PAGAMENTO
+  CONFIRMADO
+  EM_PREPARACAO
+  ENVIADO
+  ENTREGUE
+  CANCELADO
+}
+
+enum MetodoPagamento {
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  PIX
+  BOLETO
+}
+
+enum StatusPagamento {
+  PENDENTE
+  APROVADO
+  RECUSADO
+  ESTORNADO
+}
+
+Usuario "1" -- "0..*" Endereco : possui >
+Usuario "1" -- "0..1" Carrinho : tem >
+Usuario "1" -- "0..*" Pedido : realiza >
+Usuario "1" -- "0..*" Avaliacao : escreve >
+Categoria "1" -- "0..*" Produto : agrupa >
+Produto "1" -- "1" Estoque : controla >
+Produto "1" -- "0..*" Avaliacao : recebe >
+Carrinho "1" *-- "0..*" ItemCarrinho : contém
+ItemCarrinho "0..*" -- "1" Produto : referencia >
+Pedido "1" *-- "1..*" ItemPedido : contém
+ItemPedido "0..*" -- "1" Produto : referencia >
+Pedido "1" -- "1" Pagamento : possui >
+Pedido "0..*" -- "1" Endereco : entrega em >
+Pedido ..> StatusPedido
+Pagamento ..> MetodoPagamento
+Pagamento ..> StatusPagamento
+@enduml

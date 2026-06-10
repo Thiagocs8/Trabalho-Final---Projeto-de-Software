@@ -1,0 +1,69 @@
+@startuml Comunicacao-FinalizarPedido
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam sequence {
+  ArrowColor #2E86C1
+  ArrowThickness 1.5
+  LifeLineBorderColor #85929E
+  LifeLineBackgroundColor #EAF2F8
+  ParticipantBackgroundColor #EAF2F8
+  ParticipantBorderColor #2E86C1
+  ParticipantFontColor #1B4F72
+  ActorBackgroundColor #D6EAF8
+  ActorBorderColor #2E86C1
+  GroupBackgroundColor #FDFEFE
+  GroupBorderColor #85929E
+  GroupHeaderFontColor #1B4F72
+}
+skinparam database {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+}
+skinparam note {
+  BackgroundColor #FCF3CF
+  BorderColor #D4AC0D
+}
+title <b>Diagrama de Comunicação — Realização do UC-06 Finalizar Pedido</b>
+
+participant ":Controlador\nPedido" as CP
+participant ":Pedido" as P
+participant ":Serviço\nEstoque" as SE
+participant ":Serviço\nPagamento" as SP
+participant ":Repositório\nPedido" as RP
+participant ":Serviço\nNotificação" as SN
+
+note over CP #FCF3CF : 1: Cliente confirmou o pedido
+
+CP -> P : 1.1: criar(clienteId, itens, endereço)
+activate P
+P --> CP : pedido
+deactivate P
+
+CP -> SE : 1.2: reservarItens(itens)
+activate SE
+SE --> CP : reservaConfirmada
+deactivate SE
+
+CP -> RP : 1.3: salvar(pedido)
+activate RP
+RP --> CP : pedidoId
+deactivate RP
+
+CP -> SP : 1.4: cobrar(pedidoId, valorTotal)
+activate SP
+SP --> CP : resultadoPagamento
+deactivate SP
+
+alt #E8F8F5 Pagamento aprovado
+  CP -> P : 1.5a: confirmar()
+  CP -> RP : 1.6a: atualizar(CONFIRMADO)
+  CP -> SN : 1.7a: notificar(clienteId, pedidoId)
+else #FDEDEC Pagamento recusado
+  CP -> SE : 1.5b: liberarReserva(itens)
+  CP -> P : 1.6b: cancelar()
+  CP -> RP : 1.7b: atualizar(CANCELADO)
+end
+@enduml

@@ -1,0 +1,75 @@
+@startuml UC-ECommerce
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 12
+skinparam roundCorner 10
+skinparam ArrowColor #34495E
+skinparam usecase {
+  BackgroundColor #EAF2F8
+  BorderColor #2E86C1
+  FontColor #1B4F72
+  BorderThickness 1.5
+}
+skinparam actor {
+  BackgroundColor #D6EAF8
+  BorderColor #2E86C1
+  FontColor #1B4F72
+}
+skinparam rectangle {
+  BackgroundColor #FDFEFE
+  BorderColor #85929E
+  FontColor #1B4F72
+  BorderThickness 2
+}
+
+actor "Cliente" as C #D6EAF8
+actor "Administrador" as A #D5F5E3
+actor "Gateway de\nPagamento" as SP #FDEBD0
+actor "API de\nEntrega" as SE #FDEBD0
+actor "Serviço de\nE-mail" as SN #FDEBD0
+
+rectangle "ShopFlow — Loja Virtual" {
+  together {
+    usecase "<b>UC-01</b>\nCadastrar / Autenticar" as UC01
+    usecase "<b>UC-02</b>\nNavegar no Catálogo" as UC02
+    usecase "<b>UC-03</b>\nBuscar Produto" as UC03
+    usecase "<b>UC-04</b>\nVisualizar Produto" as UC04
+  }
+  together {
+    usecase "<b>UC-05</b>\nGerenciar Carrinho" as UC05
+    usecase "<b>UC-06</b>\nFinalizar Pedido" as UC06
+    usecase "<b>UC-07</b>\nProcessar Pagamento" as UC07
+    usecase "<b>UC-08</b>\nRastrear Pedido" as UC08
+    usecase "<b>UC-09</b>\nAvaliar Produto" as UC09
+  }
+  together {
+    usecase "<b>UC-10</b>\nGerenciar Produtos" as UC10
+    usecase "<b>UC-11</b>\nGerenciar Estoque" as UC11
+    usecase "<b>UC-12</b>\nGerenciar Pedidos" as UC12
+    usecase "<b>UC-13</b>\nGerar Relatórios" as UC13
+  }
+  usecase "<b>UC-14</b>\nEnviar Notificação" as UC14
+}
+
+C --> UC01
+C --> UC02
+C --> UC03
+C --> UC04
+C --> UC05
+C --> UC06
+C --> UC08
+C --> UC09
+
+A --> UC10
+A --> UC11
+A --> UC12
+A --> UC13
+
+UC06 .> UC07 : <<include>>
+UC06 .> UC14 : <<include>>
+UC07 --> SP
+UC08 --> SE
+UC14 --> SN
+@enduml

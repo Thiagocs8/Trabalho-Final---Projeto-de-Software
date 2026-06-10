@@ -1,0 +1,87 @@
+@startuml Arquitetura-ECommerce
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam ArrowColor #34495E
+skinparam component {
+  BackgroundColor #EAF2F8
+  BorderColor #2E86C1
+  FontColor #1B4F72
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #85929E
+  FontColor #1B4F72
+  FontStyle bold
+}
+skinparam database {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+  FontColor #7D6608
+}
+skinparam storage {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+  FontColor #7D6608
+}
+skinparam node {
+  BackgroundColor #F4F6F7
+  BorderColor #5D6D7E
+  FontColor #1B4F72
+}
+skinparam interface {
+  BackgroundColor #D6EAF8
+  BorderColor #2E86C1
+}
+title <b>Arquitetura em Camadas — ShopFlow</b>
+
+package "Camada de Apresentação" {
+  [Aplicação Web\n(React)] as WEB
+  [Aplicativo Mobile\n(React Native)] as MOB
+}
+
+package "Camada de Borda" {
+  [API Gateway\n(autenticação JWT,\nrate limiting, roteamento)] as GW
+}
+
+package "Camada de Aplicação (Microsserviços)" {
+  [Serviço de\nAutenticação] as AUTH
+  [Serviço de\nCatálogo] as CAT
+  [Serviço de\nCarrinho] as CART
+  [Serviço de\nPedidos] as ORD
+  [Serviço de\nPagamento] as PAY
+  [Serviço de\nNotificação] as NOT
+}
+
+package "Camada de Dados" {
+  database "PostgreSQL\n(dados transacionais)" as DB
+  database "Redis\n(cache / sessões)" as REDIS
+  storage "Object Storage\n(imagens)" as S3
+}
+
+package "Integrações Externas" {
+  [Gateway de Pagamento] as STRIPE
+  [API de Entrega] as SHIP
+  [Serviço de E-mail] as MAIL
+}
+
+WEB --> GW
+MOB --> GW
+GW --> AUTH
+GW --> CAT
+GW --> CART
+GW --> ORD
+AUTH --> DB
+CAT --> DB
+CAT --> REDIS
+CAT --> S3
+CART --> REDIS
+ORD --> DB
+ORD --> PAY
+ORD --> NOT
+ORD --> SHIP
+PAY --> STRIPE
+NOT --> MAIL
+@enduml

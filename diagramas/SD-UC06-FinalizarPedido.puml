@@ -1,0 +1,71 @@
+@startuml SD-UC06-FinalizarPedido
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam sequence {
+  ArrowColor #2E86C1
+  ArrowThickness 1.5
+  LifeLineBorderColor #85929E
+  LifeLineBackgroundColor #EAF2F8
+  ParticipantBackgroundColor #EAF2F8
+  ParticipantBorderColor #2E86C1
+  ParticipantFontColor #1B4F72
+  ActorBackgroundColor #D6EAF8
+  ActorBorderColor #2E86C1
+  GroupBackgroundColor #FDFEFE
+  GroupBorderColor #85929E
+  GroupHeaderFontColor #1B4F72
+}
+skinparam database {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+}
+skinparam note {
+  BackgroundColor #FCF3CF
+  BorderColor #D4AC0D
+}
+title <b>Diagrama de Sequência do Sistema — UC-06 Finalizar Pedido</b>
+
+actor "Cliente" as C
+participant "Interface Web" as UI
+participant ":Controlador\nPedido" as CP
+participant ":Serviço\nPagamento" as SP
+participant "Gateway de\nPagamento" as APIP
+participant ":Serviço\nNotificação" as SN
+database "Banco de\nDados" as DB
+
+C -> UI : confirmarPedido(endereço, pagamento)
+activate UI
+UI -> CP : criarPedido(clienteId, carrinhoId,\nendereço, pagamento)
+activate CP
+CP -> DB : INSERT pedido (AGUARDANDO_PAGAMENTO)
+activate DB
+DB --> CP : pedidoId
+deactivate DB
+CP -> SP : processarPagamento(pedidoId, valor)
+activate SP
+SP -> APIP : POST /charge { valor, cartão }
+activate APIP
+APIP --> SP : { status, transacaoId }
+deactivate APIP
+
+alt #E8F8F5 Pagamento aprovado
+  SP --> CP : PagamentoAprovado(transacaoId)
+  deactivate SP
+  CP -> DB : UPDATE pedido → CONFIRMADO
+  CP -> SN : notificarCliente(pedidoId)
+  activate SN
+  SN --> C : e-mail "Pedido confirmado"
+  deactivate SN
+  CP --> UI : pedidoConfirmado(número)
+  UI --> C : exibirConfirmação(número, previsão)
+else #FDEDEC Pagamento recusado
+  CP -> DB : UPDATE pedido → CANCELADO
+  CP --> UI : ErroPagamento
+  UI --> C : exibirMensagem("Pagamento não aprovado")
+end
+deactivate CP
+deactivate UI
+@enduml

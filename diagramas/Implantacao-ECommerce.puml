@@ -1,0 +1,94 @@
+@startuml Implantacao-ECommerce
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam ArrowColor #34495E
+skinparam component {
+  BackgroundColor #EAF2F8
+  BorderColor #2E86C1
+  FontColor #1B4F72
+}
+skinparam package {
+  BackgroundColor #FDFEFE
+  BorderColor #85929E
+  FontColor #1B4F72
+  FontStyle bold
+}
+skinparam database {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+  FontColor #7D6608
+}
+skinparam storage {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+  FontColor #7D6608
+}
+skinparam node {
+  BackgroundColor #F4F6F7
+  BorderColor #5D6D7E
+  FontColor #1B4F72
+}
+skinparam interface {
+  BackgroundColor #D6EAF8
+  BorderColor #2E86C1
+}
+title <b>Diagrama de Implantação — ShopFlow</b>
+
+node "Dispositivo do Cliente" as CLIENTE {
+  [Browser / App Mobile] as APP
+}
+
+node "CDN" as CDN {
+  [Assets estáticos\ne imagens] as ASSETS
+}
+
+node "Nuvem (AWS) — Região sa-east-1" {
+  node "Load Balancer (ALB)" as LB {
+    [NGINX] as NGINX
+  }
+  node "Cluster Kubernetes (EKS)" as K8S {
+    [Pod: Autenticação] as P1
+    [Pod: Catálogo] as P2
+    [Pod: Carrinho] as P3
+    [Pod: Pedidos] as P4
+    [Pod: Pagamento] as P5
+    [Pod: Notificação] as P6
+  }
+  node "RDS PostgreSQL" as RDS {
+    database "shopflow_db" as DB
+  }
+  node "ElastiCache" as EC {
+    database "Redis" as REDIS
+  }
+  node "S3" as S3N {
+    storage "imagens-produtos" as S3
+  }
+}
+
+node "Serviços Externos" as EXT {
+  [Gateway de Pagamento] as STRIPE
+  [API dos Correios] as SHIP
+  [SendGrid] as MAIL
+}
+
+APP --> NGINX : HTTPS
+APP --> ASSETS : HTTPS
+NGINX --> P1
+NGINX --> P2
+NGINX --> P3
+NGINX --> P4
+P4 --> P5
+P4 --> P6
+P1 --> DB
+P2 --> DB
+P4 --> DB
+P2 --> REDIS
+P3 --> REDIS
+P2 --> S3
+P5 --> STRIPE : HTTPS
+P4 --> SHIP : HTTPS
+P6 --> MAIL : SMTP
+@enduml

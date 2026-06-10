@@ -1,0 +1,68 @@
+@startuml SD-UC05-Carrinho
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Verdana
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam sequence {
+  ArrowColor #2E86C1
+  ArrowThickness 1.5
+  LifeLineBorderColor #85929E
+  LifeLineBackgroundColor #EAF2F8
+  ParticipantBackgroundColor #EAF2F8
+  ParticipantBorderColor #2E86C1
+  ParticipantFontColor #1B4F72
+  ActorBackgroundColor #D6EAF8
+  ActorBorderColor #2E86C1
+  GroupBackgroundColor #FDFEFE
+  GroupBorderColor #85929E
+  GroupHeaderFontColor #1B4F72
+}
+skinparam database {
+  BackgroundColor #FEF9E7
+  BorderColor #D4AC0D
+}
+skinparam note {
+  BackgroundColor #FCF3CF
+  BorderColor #D4AC0D
+}
+title <b>Diagrama de Sequência do Sistema — UC-05 Adicionar Item ao Carrinho</b>
+
+actor "Cliente" as C
+participant "Interface Web" as UI
+participant ":Controlador\nCarrinho" as CC
+participant ":Serviço\nEstoque" as SE
+participant ":Repositório\nCarrinho" as RC
+database "Banco de\nDados" as DB
+
+C -> UI : adicionarAoCarrinho(produtoId, qtd)
+activate UI
+UI -> CC : adicionarItem(clienteId, produtoId, qtd)
+activate CC
+CC -> SE : verificarDisponibilidade(produtoId, qtd)
+activate SE
+SE -> DB : consultar estoque do produto
+activate DB
+DB --> SE : quantidadeDisponível
+deactivate DB
+
+alt #E8F8F5 Estoque suficiente
+  SE --> CC : disponível = true
+  deactivate SE
+  CC -> RC : salvarItem(clienteId, produtoId, qtd, preço)
+  activate RC
+  RC -> DB : INSERT / UPDATE carrinho
+  activate DB
+  DB --> RC : ok
+  deactivate DB
+  RC --> CC : itemAdicionado
+  deactivate RC
+  CC --> UI : carrinhoAtualizado
+  UI --> C : exibirCarrinho(itens, total)
+else #FDEDEC Estoque insuficiente
+  CC --> UI : ErroEstoqueInsuficiente
+  UI --> C : exibirAlerta("Sem estoque suficiente")
+end
+deactivate CC
+deactivate UI
+@enduml
