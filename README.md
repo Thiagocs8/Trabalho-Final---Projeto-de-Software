@@ -284,7 +284,7 @@ Estratégia prevista:
 
 | Aluno | Curso | Instituição |
 | :--- | :--- | :--- |
-| **Thiago Costa Soares** | Engenharia de Software | *(sua instituição)* |
+| **Thiago Costa Soares** | Engenharia de Software | Pontifícia Universidade Católica de Minas Gerais (PUC Minas) |
 
 Trabalho **individual** da disciplina **Projeto de Software**.
 
